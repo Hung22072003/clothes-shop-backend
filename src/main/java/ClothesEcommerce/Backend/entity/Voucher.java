@@ -1,0 +1,39 @@
+package ClothesEcommerce.Backend.entity;
+
+import ClothesEcommerce.Backend.dto.VoucherDTO;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Entity
+@Table(name = "voucher")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Voucher {
+    @Id
+    private String id_voucher;
+    private LocalDate start_date;
+    private LocalDate end_date;
+    private int quantity;
+    private Long min_total;
+    private Long discount_price;
+
+
+    public Voucher(VoucherDTO voucherDTO) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        this.id_voucher = voucherDTO.getId();
+        this.start_date = LocalDate.parse(voucherDTO.getStart_date(), formatter);
+        this.end_date = LocalDate.parse(voucherDTO.getEnd_date(), formatter);
+        this.quantity = voucherDTO.getQuantity();
+        this.min_total = voucherDTO.getMin_total();
+        this.discount_price = voucherDTO.getDiscount_price();
+    }
+}
