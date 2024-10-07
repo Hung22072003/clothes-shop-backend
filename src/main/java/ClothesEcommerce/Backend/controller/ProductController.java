@@ -4,6 +4,7 @@ import ClothesEcommerce.Backend.dto.CategoryDTO;
 import ClothesEcommerce.Backend.dto.ProductDTO;
 import ClothesEcommerce.Backend.model.ApiResponse;
 import ClothesEcommerce.Backend.model.ColorSize;
+import ClothesEcommerce.Backend.model.PaginationObjectResponse;
 import ClothesEcommerce.Backend.model.ProductRequest;
 import ClothesEcommerce.Backend.service.ProductService;
 import jakarta.validation.Valid;
@@ -21,12 +22,12 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
     @GetMapping("/getByCategory/{id}")
-    public ApiResponse<List<ProductDTO>> getProductsByCategory(
+    public ApiResponse<PaginationObjectResponse> getProductsByCategory(
             @PathVariable int id,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        ApiResponse<List<ProductDTO>> apiResponse = new ApiResponse<>();
+        ApiResponse<PaginationObjectResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(productService.getProductsByCategory(id, page, size));
         return apiResponse;
     }
@@ -50,12 +51,12 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<ProductDTO>> searchProducts(
+    public ApiResponse<PaginationObjectResponse> searchProducts(
             @RequestParam(name = "query") String query,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "4") int size
     ) {
-        ApiResponse<List<ProductDTO>> apiResponse = new ApiResponse<>();
+        ApiResponse<PaginationObjectResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(productService.searchProducts(query, page, size));
         return apiResponse;
     }

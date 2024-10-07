@@ -24,11 +24,12 @@ public class CategoryController {
         return apiResponse;
     }
 
-    @PostMapping("/all")
-    public void getAllCategory(
-            @RequestPart("options") OptionsRequest optionsRequest
+    @GetMapping("/all")
+    public ApiResponse<List<CategoryDTO>> getAllCategory(
     ) {
-        System.out.println(optionsRequest);
+        ApiResponse<List<CategoryDTO>> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(categoryService.getAllCategory());
+        return apiResponse;
     }
 
     @GetMapping("/getCategoryById/{id}")

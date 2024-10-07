@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,6 @@ public class CategoryDTO {
         this.name = category.getName();
         this.theme = category.getTheme();
         this.background = category.getBackground();
-        this.subcategories = (category.getSubcategories().isEmpty()) ? null : category.getSubcategories().stream().map(CategoryDTO::new).collect(Collectors.toList());
+        this.subcategories = (category.getSubcategories().isEmpty()) ? null : category.getSubcategories().stream().map(CategoryDTO::new).sorted(Comparator.comparing(CategoryDTO::getId)).collect(Collectors.toList());
     }
 }

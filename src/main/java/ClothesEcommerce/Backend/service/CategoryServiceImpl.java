@@ -4,6 +4,7 @@ import ClothesEcommerce.Backend.dto.CategoryDTO;
 import ClothesEcommerce.Backend.model.OptionsRequest;
 import ClothesEcommerce.Backend.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -17,7 +18,7 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryRepository categoryRepository;
     @Override
     public List<CategoryDTO> getAllCategory() {
-        return categoryRepository.findAll().stream().map(CategoryDTO::new).sorted(Comparator.comparing(CategoryDTO::getId)).collect(Collectors.toList());
+        return categoryRepository.findAll(Sort.by("id")).stream().map(CategoryDTO::new).collect(Collectors.toList());
     }
 
     @Override

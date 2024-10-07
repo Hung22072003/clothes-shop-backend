@@ -10,12 +10,12 @@ import ClothesEcommerce.Backend.entity.embeddedID.ProductColorId;
 import ClothesEcommerce.Backend.entity.embeddedID.ProductSizeColorId;
 import ClothesEcommerce.Backend.exception.AppException;
 import ClothesEcommerce.Backend.exception.ErrorCode;
-import ClothesEcommerce.Backend.model.ColorSize;
+import ClothesEcommerce.Backend.model.Pagination;
+import ClothesEcommerce.Backend.model.PaginationObjectResponse;
 import ClothesEcommerce.Backend.model.ProductRequest;
 import ClothesEcommerce.Backend.repository.*;
 import com.cloudinary.utils.ObjectUtils;
 import lombok.RequiredArgsConstructor;
-import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,16 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,9 +41,9 @@ public class ProductServiceImpl implements ProductService{
     private final ProductSizeColorRepository productSizeColorRepository;
     private final ProductDescriptionRepository productDescriptionRepository;
     @Override
-    public List<ProductDTO> getProductsByCategory(int id, int page, int size) {
+    public PaginationObjectResponse getProductsByCategory(int id, int page, int size) {
         Page<Product> productPage = productRepository.findProductsByCategory(id, PageRequest.of(page, size, Sort.by("id").descending()));
-        return productPage.get().map(ProductDTO::new).toList();
+        return PaginationObjectResponse.builder().data(productPage.get().map(ProductDTO::new).toList()).pagination(new Pagination(productPage.getTotalElements(), productPage.getTotalPages(), productPage.getNumber())).build();
     }
 
     @Override
@@ -126,7 +119,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductDTO getProductById(int id) {
+    public ProductDTO   getProductById(int id) {
             Product foundProduct = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
             List<SizeColorDTO> sizeColorDTOS = new ArrayList<SizeColorDTO>();
             List<ColorDTO> colorDTOS = foundProduct.getProductColors().stream().map((color) -> {
@@ -135,7 +128,7 @@ public class ProductServiceImpl implements ProductService{
             }).toList();
 
             colorDTOS.forEach((colorDTO) -> {
-                List<ProductSizeColor> productSizeColors = productSizeColorRepository.findAllByProductAndColor(foundProduct, colorRepository.findById(colorDTO.getId()).orElse(null)).stream().sorted(Comparator.comparing((productSizeColor -> productSizeColor.getSize().getSize()))).toList();
+                List<ProductSizeColor> productSizeColors = productSizeColorRepository.findAllByProductAndColor(foundProduct, colorRepository.findById(colorDTO.getId()).orElse(null)).stream().sorted(Comparator.comparing((productSizeColor -> productSizeColor.getSize().getId()))).toList();
                 sizeColorDTOS.get(sizeColorDTOS.indexOf(new SizeColorDTO(colorDTO.getId()))).setValues(productSizeColors.stream().map(SizeDTO::new).collect(Collectors.toList()));
             });
             ProductDTO productDTO = new ProductDTO(foundProduct);
@@ -145,9 +138,10 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public List<ProductDTO> searchProducts(String query, int page, int size) {
-        if(query.isEmpty()) return List.of();
-        return productRepository.findByNameContaining(query, PageRequest.of(page, size, Sort.by("id").descending())).stream().map(ProductDTO::new).toList();
+    public PaginationObjectResponse searchProducts(String query, int page, int size) {
+        if(query.isEmpty()) return PaginationObjectResponse.builder().build();
+        Page<Product> productPage =  productRepository.findByNameContaining(query, PageRequest.of(page, size, Sort.by("id").descending()));
+        return PaginationObjectResponse.builder().data(productPage.get().map(ProductDTO::new).toList()).pagination(new Pagination(productPage.getTotalElements(), productPage.getTotalPages(), productPage.getNumber())).build();
     }
 
     @Override
